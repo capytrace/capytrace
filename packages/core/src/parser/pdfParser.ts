@@ -3,7 +3,15 @@ import * as pdfParse from 'pdf-parse'
 import type { IParser, ParseInput } from './types.js'
 import type { Document } from '../types.js'
 
-const parse = ((pdfParse as unknown as { default: (buffer: Buffer) => Promise<any> }).default ?? pdfParse) as (buffer: Buffer) => Promise<any>
+interface PdfParseResult {
+  text: string
+  numpages: number
+  info: Record<string, unknown>
+}
+
+type PdfParseFn = (buffer: Buffer) => Promise<PdfParseResult>
+
+const parse = ((pdfParse as unknown as { default: PdfParseFn }).default ?? pdfParse) as PdfParseFn
 
 export class PdfParser implements IParser {
   readonly supportedExtensions = ['.pdf']
