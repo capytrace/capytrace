@@ -1,0 +1,10 @@
+{
+  "name": "@ferretsearch/core",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests yet\" && exit 0"
+  }
+}
