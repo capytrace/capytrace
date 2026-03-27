@@ -44,5 +44,5 @@ indexWorker.on('completed', (job, result) => {
 })
 
 indexWorker.on('failed', (job, error) => {
-  console.error(`Job ${job.id} failed — ${error.message}`)
+  console.error(`Job ${job?.id} failed — ${error.message}`)
 })
