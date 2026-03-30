@@ -23,7 +23,14 @@ async function processIndexJob(
   job: Job<IndexJobData, IndexJobResult>,
 ): Promise<IndexJobResult> {
   const start = Date.now()
-  const { document } = job.data
+  const { document: rawDocument } = job.data
+
+  // BullMQ serializes via JSON — dates become strings, convert back
+  const document = {
+    ...rawDocument,
+    createdAt: new Date(rawDocument.createdAt),
+    updatedAt: new Date(rawDocument.updatedAt),
+  }
 
   try {
     await qdrantStore.createCollectionIfNotExists()

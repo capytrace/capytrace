@@ -5,6 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "pnpm --filter @ferretsearch/api dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "eslint .",

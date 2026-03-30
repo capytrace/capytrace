@@ -19,6 +19,13 @@ export class OllamaEmbedder implements IEmbedder {
     this.config = { ...DEFAULTS, ...config }
   }
 
+  async embedText(text: string): Promise<number[]> {
+    const embeddings = await this.embedBatchWithRetry([text])
+    const result = embeddings[0]
+    if (result === undefined) throw new Error('Ollama returned no embedding for the query')
+    return result
+  }
+
   async embedChunks(chunks: Chunk[]): Promise<Chunk[]> {
     if (chunks.length === 0) return []
 
@@ -67,6 +74,10 @@ export class OllamaEmbedder implements IEmbedder {
         signal: controller.signal,
       })
 
+      if (response.status === 404) {
+        return await this.callOllamaApiLegacy(texts, controller.signal)
+      }
+
       if (!response.ok) {
         throw new Error(`Ollama API error: ${response.status} ${response.statusText}`)
       }
@@ -76,6 +87,26 @@ export class OllamaEmbedder implements IEmbedder {
     } finally {
       clearTimeout(timer)
     }
+  }
+
+  private async callOllamaApiLegacy(texts: string[], signal: AbortSignal): Promise<number[][]> {
+    const results: number[][] = []
+    for (const text of texts) {
+      const response = await fetch(`${this.config.ollamaUrl}/api/embeddings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: this.config.model, prompt: text }),
+        signal,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Ollama API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = (await response.json()) as { embedding: number[] }
+      results.push(data.embedding)
+    }
+    return results
   }
 }
 

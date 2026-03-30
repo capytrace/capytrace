@@ -14,4 +14,7 @@ export interface ChunkPayload {
   permissions: string[]
   chunkIndex: number
   createdAt: string
+  title: string
+  url?: string
+  author?: string
 }

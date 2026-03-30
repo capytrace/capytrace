@@ -2,6 +2,12 @@
   "name": "@ferretsearch/connectors",
   "version": "1.0.0",
   "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",

@@ -1,5 +1,5 @@
 import { QdrantClient } from '@qdrant/js-client-rest'
-import type { Chunk, Document } from '../types.js'
+import type { Chunk, Document, SearchResult } from '../types.js'
 import type { ChunkPayload, QdrantConfig } from './types.js'
 
 const DEFAULTS: QdrantConfig = {
@@ -9,6 +9,14 @@ const DEFAULTS: QdrantConfig = {
 }
 
 const UPSERT_BATCH_SIZE = 100
+
+export interface SearchOptions {
+  limit?: number
+  filter?: {
+    sourceType?: string
+    author?: string
+  }
+}
 
 export class QdrantStore {
   private readonly client: QdrantClient
@@ -56,7 +64,10 @@ export class QdrantStore {
             permissions: document.permissions,
             chunkIndex: chunk.index,
             createdAt: document.createdAt.toISOString(),
+            title: document.title,
           }
+          if (document.url !== undefined) payload.url = document.url
+          if (document.author !== undefined) payload.author = document.author
           return {
             id: chunk.id,
             vector: { dense: chunk.embedding! },
@@ -65,6 +76,58 @@ export class QdrantStore {
         }),
       })
     }
+  }
+
+  async search(vector: number[], options: SearchOptions = {}): Promise<SearchResult[]> {
+    const mustClauses: Array<{ key: string; match: { value: unknown } }> = []
+
+    if (options.filter?.sourceType !== undefined) {
+      mustClauses.push({ key: 'sourceType', match: { value: options.filter.sourceType } })
+    }
+    if (options.filter?.author !== undefined) {
+      mustClauses.push({ key: 'author', match: { value: options.filter.author } })
+    }
+
+    const searchParams: Record<string, unknown> = {
+      vector: { name: 'dense', vector },
+      limit: options.limit ?? 10,
+      with_payload: true,
+    }
+    if (mustClauses.length > 0) {
+      searchParams['filter'] = { must: mustClauses }
+    }
+
+    const points = await (
+      this.client as unknown as {
+        search(
+          name: string,
+          params: Record<string, unknown>,
+        ): Promise<
+          Array<{
+            id: string | number
+            score: number
+            payload?: Record<string, unknown> | null
+          }>
+        >
+      }
+    ).search(this.config.collectionName, searchParams)
+
+    return points.map((point) => {
+      const p = (point.payload ?? {}) as Partial<ChunkPayload>
+      const sourceType = (p.sourceType ?? 'slack') as Document['sourceType']
+
+      const result: SearchResult = {
+        documentId: p.documentId ?? '',
+        chunkId: String(point.id),
+        score: point.score,
+        title: p.title ?? '',
+        snippet: p.content ?? '',
+        sourceType,
+        highlights: [],
+      }
+      if (p.url !== undefined) result.url = p.url
+      return result
+    })
   }
 
   async deleteDocument(documentId: string): Promise<void> {
