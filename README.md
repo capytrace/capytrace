@@ -1,7 +1,8 @@
 <h1 align="center">FerretSearch</h1>
 
 <p align="center"
-  <img width="1536" height="1024" alt="ferretsearch_textnobg" src="https://github.com/user-attachments/assets/1ab2f43b-bbf9-44a2-9c7a-cf3ec135833a" />
+  <img width="1536" height="1024" alt="ferretsearch_textnobg" src="https://github.com/user-attachments/assets/210080a2-f9a5-4bfe-8d37-c9750868f25f" />
+
 </p>
 
 **Corporate open-source search engine.** Index knowledge from Slack, GitHub, and your filesystem into a single semantic search API.
