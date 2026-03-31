@@ -1,4 +1,4 @@
-<h1 align="center">FerretSearch</h1>
+<h1 align="center">Capytrace</h1>
 
 <p align="center"
   <img width="1536" height="1024" alt="ferretsearch_textnobg" src="https://github.com/user-attachments/assets/210080a2-f9a5-4bfe-8d37-c9750868f25f" />
@@ -7,7 +7,7 @@
 
 **Corporate open-source search engine.** Index knowledge from Slack, GitHub, and your filesystem into a single semantic search API.
 
-FerretSearch connects to your internal tools, chunks and embeds documents locally using [Ollama](https://ollama.com), stores vectors in [Qdrant](https://qdrant.tech), and exposes a search API that returns the most relevant results across all sources.
+Capytrace connects to your internal tools, chunks and embeds documents locally using [Ollama](https://ollama.com), stores vectors in [Qdrant](https://qdrant.tech), and exposes a search API that returns the most relevant results across all sources.
 
 ---
 
@@ -49,7 +49,7 @@ Sources (Slack, GitHub, ...) → Connectors → BullMQ Queue → Indexing Pipeli
 
 ### Embedding model
 
-FerretSearch uses `nomic-embed-text` by default (768-dimensional vectors). Pull it before starting:
+Capytrace uses `nomic-embed-text` by default (768-dimensional vectors). Pull it before starting:
 
 ```bash
 ollama pull nomic-embed-text
