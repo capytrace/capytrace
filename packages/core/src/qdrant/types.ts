@@ -8,6 +8,7 @@ export interface QdrantConfig {
 
 export interface ChunkPayload {
   documentId: string
+  stableId: string
   sourceType: Document['sourceType']
   sourceId: string
   content: string

@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ferret
-      POSTGRES_PASSWORD: ferret
-      POSTGRES_DB: ferretsearch
+      POSTGRES_USER: capytrace
+      POSTGRES_PASSWORD: capytrace
+      POSTGRES_DB: capytrace
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ferret']
+      test: ['CMD-SHELL', 'pg_isready -U capytrace']
       interval: 5s
       timeout: 5s
       retries: 5

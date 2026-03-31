@@ -4,7 +4,7 @@ import type { ChunkPayload, QdrantConfig } from './types.js'
 
 const DEFAULTS: QdrantConfig = {
   url: 'http://localhost:6333',
-  collectionName: 'ferretsearch',
+  collectionName: 'capytrace',
   vectorSize: 768,
 }
 
@@ -58,6 +58,7 @@ export class QdrantStore {
         points: batch.map((chunk) => {
           const payload: ChunkPayload = {
             documentId: chunk.documentId,
+            stableId: document.stableId,
             sourceType: document.sourceType,
             sourceId: document.sourceId,
             content: chunk.content,
@@ -130,11 +131,11 @@ export class QdrantStore {
     })
   }
 
-  async deleteDocument(documentId: string): Promise<void> {
+  async deleteByStableId(stableId: string): Promise<void> {
     await this.client.delete(this.config.collectionName, {
       wait: true,
       filter: {
-        must: [{ key: 'documentId', match: { value: documentId } }],
+        must: [{ key: 'stableId', match: { value: stableId } }],
       },
     })
   }

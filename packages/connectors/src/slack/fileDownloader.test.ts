@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { SlackFile } from './types.js'
 
 // ---------------------------------------------------------------------------
-// Mock @ferretsearch/core so getParser is controllable
+// Mock @capytrace/core so getParser is controllable
 // ---------------------------------------------------------------------------
 const { mockGetParser } = vi.hoisted(() => ({
   mockGetParser: vi.fn(),
 }))
 
-vi.mock('@ferretsearch/core', () => ({
+vi.mock('@capytrace/core', () => ({
   getParser: mockGetParser,
 }))
 

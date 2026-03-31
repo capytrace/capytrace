@@ -25,6 +25,7 @@ import { indexQueue } from './indexQueue.js'
 
 const mockDocument: Document = {
   id: 'doc-1',
+  stableId: 'slack:workspace-1:ext-1',
   sourceType: 'slack',
   sourceId: 'workspace-1',
   externalId: 'ext-1',

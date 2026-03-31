@@ -16,7 +16,7 @@ export function loadGitHubConfig(projectRoot?: string): GitHubConfig {
   if (!token) {
     throw new Error(
       'GitHub connector is not configured: GITHUB_TOKEN environment variable is missing. ' +
-        'Set it in your environment or under connectors.github.token in ferretsearch.config.yml.',
+        'Set it in your environment or under connectors.github.token in capytrace.config.yml.',
     )
   }
 
@@ -32,7 +32,7 @@ export function loadGitHubConfig(projectRoot?: string): GitHubConfig {
   if (repos.length === 0) {
     throw new Error(
       'GitHub connector is not configured: GITHUB_REPOS is missing or empty. ' +
-        'Set it in your environment or under connectors.github.repos in ferretsearch.config.yml.',
+        'Set it in your environment or under connectors.github.repos in capytrace.config.yml.',
     )
   }
 

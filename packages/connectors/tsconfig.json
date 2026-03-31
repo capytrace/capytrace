@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@ferretsearch/connectors/*": ["./src/*"]
+      "@capytrace/connectors/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

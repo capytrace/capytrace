@@ -15,6 +15,7 @@ export class TextParser implements IParser {
 
     return {
       id: randomUUID(),
+      stableId: input.stableId ?? `${input.sourceType}:${input.sourceId}:${input.externalId}`,
       sourceType: input.sourceType,
       sourceId: input.sourceId,
       externalId: input.externalId,

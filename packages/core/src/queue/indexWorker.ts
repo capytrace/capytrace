@@ -35,6 +35,9 @@ async function processIndexJob(
   try {
     await qdrantStore.createCollectionIfNotExists()
 
+    // Remove stale chunks from previous indexing of this document
+    await qdrantStore.deleteByStableId(document.stableId)
+
     const chunks = chunker.chunk(document.id, document.content)
     await job.updateProgress(10)
 

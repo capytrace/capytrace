@@ -27,6 +27,7 @@ vi.mock('@qdrant/js-client-rest', () => ({
 function makeDocument(id = 'doc-001'): Document {
   return {
     id,
+    stableId: 'filesystem:src-1:ext-1',
     sourceType: 'filesystem',
     sourceId: 'src-1',
     externalId: 'ext-1',
@@ -70,7 +71,7 @@ describe('QdrantStore', () => {
 
       expect(mockCreateCollection).toHaveBeenCalledTimes(1)
       expect(mockCreateCollection).toHaveBeenCalledWith(
-        'ferretsearch',
+        'capytrace',
         expect.objectContaining({
           vectors: { dense: { size: 768, distance: 'Cosine' } },
           sparse_vectors: { sparse: {} },
@@ -99,13 +100,14 @@ describe('QdrantStore', () => {
 
       expect(mockUpsert).toHaveBeenCalledTimes(1)
       const [collectionName, args] = mockUpsert.mock.calls[0] as [string, { points: unknown[] }]
-      expect(collectionName).toBe('ferretsearch')
+      expect(collectionName).toBe('capytrace')
       expect(args.points).toHaveLength(2)
       expect(args.points[0]).toMatchObject({
         id: 'chunk-0',
         vector: { dense: [0.1, 0.2] },
         payload: {
           documentId: 'doc-001',
+          stableId: 'filesystem:src-1:ext-1',
           sourceType: 'filesystem',
           sourceId: 'src-1',
           content: 'chunk 0',
@@ -148,18 +150,18 @@ describe('QdrantStore', () => {
     })
   })
 
-  describe('deleteDocument', () => {
-    it('deletes points using a payload filter on documentId', async () => {
-      await new QdrantStore().deleteDocument('doc-999')
+  describe('deleteByStableId', () => {
+    it('deletes points using a payload filter on stableId', async () => {
+      await new QdrantStore().deleteByStableId('stable-id-123')
 
       expect(mockDelete).toHaveBeenCalledTimes(1)
       const [collectionName, args] = mockDelete.mock.calls[0] as [
         string,
         { filter: { must: { key: string; match: { value: string } }[] } },
       ]
-      expect(collectionName).toBe('ferretsearch')
+      expect(collectionName).toBe('capytrace')
       expect(args.filter).toMatchObject({
-        must: [{ key: 'documentId', match: { value: 'doc-999' } }],
+        must: [{ key: 'stableId', match: { value: 'stable-id-123' } }],
       })
     })
   })

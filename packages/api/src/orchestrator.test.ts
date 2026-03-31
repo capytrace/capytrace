@@ -26,7 +26,7 @@ const {
   mockLoadGitHubConfig: vi.fn(),
 }))
 
-vi.mock('@ferretsearch/core', () => ({
+vi.mock('@capytrace/core', () => ({
   indexQueue: { add: mockAdd },
 }))
 
@@ -57,7 +57,7 @@ const GITHUB_CONFIG = {
   codeExtensions: ['.ts'],
 }
 
-vi.mock('@ferretsearch/connectors', () => ({
+vi.mock('@capytrace/connectors', () => ({
   SlackConnector: class {
     config = SLACK_CONFIG
     connect = mockConnect

@@ -11,7 +11,7 @@ const { mockEmbedText, mockSearch, mockIsPaused } = vi.hoisted(() => ({
   mockIsPaused: vi.fn(),
 }))
 
-vi.mock('@ferretsearch/core', () => ({
+vi.mock('@capytrace/core', () => ({
   OllamaEmbedder: class {
     embedText = mockEmbedText
   },

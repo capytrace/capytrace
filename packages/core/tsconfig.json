@@ -4,7 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@ferretsearch/core/*": ["./src/*"]
+      "@capytrace/core/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

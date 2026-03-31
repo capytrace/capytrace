@@ -243,6 +243,7 @@ describe('GitHubConnector.sync() — README', () => {
     expect(doc.sourceId).toBe('owner/repo')
     expect(doc.content).toContain('Hello World')
     expect(doc.permissions).toEqual(['*'])
+    expect(doc.stableId).toBe('github:owner/repo:readme')
   })
 
   it('skips README when content is empty', async () => {
@@ -296,6 +297,7 @@ describe('GitHubConnector.sync() — issues', () => {
     expect(doc.metadata['state']).toBe('open')
     expect(doc.metadata['labels']).toEqual(['bug', 'good first issue'])
     expect(doc.id).toMatch(/^[0-9a-f-]{36}$/)
+    expect(doc.stableId).toBe('github:owner/repo:issue-42')
   })
 
   it('concatenates body and comments with separator', async () => {
@@ -348,6 +350,7 @@ describe('GitHubConnector.sync() — PRs', () => {
     expect(doc.author).toBe('bob')
     expect(doc.metadata['state']).toBe('merged')
     expect(doc.metadata['merged']).toBe(true)
+    expect(doc.stableId).toBe('github:owner/repo:pr-7')
   })
 
   it('sets merged:false for open PR', async () => {
@@ -359,5 +362,40 @@ describe('GitHubConnector.sync() — PRs', () => {
     const docs = []
     for await (const doc of connector.sync()) docs.push(doc)
     expect(docs[0]!.metadata['merged']).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// sync() — Wiki document
+// ---------------------------------------------------------------------------
+describe('GitHubConnector.sync() — Wiki', () => {
+  it('yields wiki document with correct stableId', async () => {
+    mockGetWiki.mockResolvedValue('# Wiki content')
+    const connector = new GitHubConnector(
+      makeConfig({ indexReadme: false, indexIssues: false, indexPRs: false }),
+    )
+    const docs = []
+    for await (const doc of connector.sync()) docs.push(doc)
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]!.externalId).toBe('wiki')
+    expect(docs[0]!.stableId).toBe('github:owner/repo:wiki')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// sync() — File document
+// ---------------------------------------------------------------------------
+describe('GitHubConnector.sync() — file stableId', () => {
+  it('yields file document with correct stableId', async () => {
+    mockGetFiles.mockReturnValue(asyncGenOf([makeFile()]))
+    const connector = new GitHubConnector(
+      makeConfig({ indexReadme: false, indexIssues: false, indexPRs: false, indexWiki: false, indexCode: true }),
+    )
+    const docs = []
+    for await (const doc of connector.sync()) docs.push(doc)
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]!.stableId).toBe('github:owner/repo:file-src/index.ts')
   })
 })

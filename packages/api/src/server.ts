@@ -1,8 +1,8 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
-import { OllamaEmbedder, QdrantStore, indexQueue } from '@ferretsearch/core'
-import type { SearchResult } from '@ferretsearch/core'
+import { OllamaEmbedder, QdrantStore, indexQueue } from '@capytrace/core'
+import type { SearchResult } from '@capytrace/core'
 import type { Orchestrator } from './orchestrator.js'
 
 // ---------------------------------------------------------------------------
@@ -98,7 +98,19 @@ export async function buildServer(orchestrator: Orchestrator) {
 
       const results = await store.search(vector, searchOptions)
 
-      return reply.send({ results, took: Date.now() - start, total: results.length })
+      // Deduplicate: keep only the highest-scoring chunk per document
+      const seen = new Map<string, SearchResult>()
+      for (const result of results) {
+        const existing = seen.get(result.documentId)
+        if (existing === undefined || result.score > existing.score) {
+          seen.set(result.documentId, result)
+        }
+      }
+      const deduplicated = Array.from(seen.values())
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+
+      return reply.send({ results: deduplicated, took: Date.now() - start, total: deduplicated.length })
     },
   )
 

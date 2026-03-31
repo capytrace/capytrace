@@ -1,11 +1,11 @@
 {
-  "name": "ferretsearch",
+  "name": "capytrace",
   "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm --filter @ferretsearch/api dev",
+    "dev": "pnpm --filter @capytrace/api dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "eslint .",

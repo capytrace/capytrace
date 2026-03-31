@@ -1,4 +1,4 @@
-import { getParser } from '@ferretsearch/core'
+import { getParser } from '@capytrace/core'
 import type { SlackFile } from './types.js'
 
 const MAX_SIZE_BYTES = 52_428_800 // 50 MB

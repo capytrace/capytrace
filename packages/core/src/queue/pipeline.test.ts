@@ -22,6 +22,7 @@ const { state, mocks } = vi.hoisted(() => {
       chunkFn: vi.fn().mockReturnValue([chunk]),
       embedChunks: vi.fn().mockResolvedValue([embeddedChunk]),
       createCollectionIfNotExists: vi.fn().mockResolvedValue(undefined),
+      deleteByStableId: vi.fn().mockResolvedValue(undefined),
       upsertChunks: vi.fn().mockResolvedValue(undefined),
     },
   }
@@ -59,6 +60,7 @@ vi.mock('../qdrant/qdrantStore.js', () => ({
   QdrantStore: vi.fn(function () {
     return {
       createCollectionIfNotExists: mocks.createCollectionIfNotExists,
+      deleteByStableId: mocks.deleteByStableId,
       upsertChunks: mocks.upsertChunks,
     }
   }),
@@ -73,6 +75,7 @@ import './indexWorker.js'
 function makeDocument(id = 'doc-1'): Document {
   return {
     id,
+    stableId: 'filesystem:src-1:ext-1',
     sourceType: 'filesystem',
     sourceId: 'src-1',
     externalId: 'ext-1',
@@ -101,6 +104,7 @@ beforeEach(() => {
   mocks.chunkFn.mockReturnValue([mocks.chunk])
   mocks.embedChunks.mockResolvedValue([mocks.embeddedChunk])
   mocks.createCollectionIfNotExists.mockResolvedValue(undefined)
+  mocks.deleteByStableId.mockResolvedValue(undefined)
   mocks.upsertChunks.mockResolvedValue(undefined)
 })
 
@@ -113,6 +117,9 @@ describe('indexWorker pipeline', () => {
     // Stage 1: collection + chunking
     expect(mocks.createCollectionIfNotExists).toHaveBeenCalledTimes(1)
     expect(mocks.chunkFn).toHaveBeenCalledWith('doc-1', 'hello world this is content')
+
+    // Stale chunk deletion
+    expect(mocks.deleteByStableId).toHaveBeenCalledTimes(1)
 
     // Stage 2: embedding receives raw chunks
     expect(mocks.embedChunks).toHaveBeenCalledWith([mocks.chunk])
@@ -127,6 +134,19 @@ describe('indexWorker pipeline', () => {
 
     expect(result.success).toBe(true)
     expect(result.documentId).toBe('doc-1')
+  })
+
+  it('calls deleteByStableId with document.stableId before upserting', async () => {
+    const doc = makeDocument()
+    const job = makeJob(doc)
+
+    await state.capturedProcessor!(job)
+
+    expect(mocks.deleteByStableId).toHaveBeenCalledWith(doc.stableId)
+
+    const deleteOrder = mocks.deleteByStableId.mock.invocationCallOrder[0]!
+    const upsertOrder = mocks.upsertChunks.mock.invocationCallOrder[0]!
+    expect(deleteOrder).toBeLessThan(upsertOrder)
   })
 
   it('returns chunksIndexed matching the number of chunks produced by the embedder', async () => {

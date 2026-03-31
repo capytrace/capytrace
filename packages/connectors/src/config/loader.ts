@@ -21,19 +21,30 @@ interface YamlGitHubConfig {
   syncIntervalMinutes?: number
 }
 
-export interface FerretSearchYaml {
+interface YamlDriveConfig {
+  serviceAccountKeyPath?: string
+  folderIds?: string[]
+  indexDocs?: boolean
+  indexSheets?: boolean
+  indexSlides?: boolean
+  indexFiles?: boolean
+  syncIntervalMinutes?: number
+}
+
+export interface CapyTraceYaml {
   connectors?: {
     slack?: YamlSlackConfig
     github?: YamlGitHubConfig
+    drive?: YamlDriveConfig
   }
 }
 
-export function readYamlConfig(projectRoot: string): FerretSearchYaml {
-  const configPath = join(projectRoot, 'ferretsearch.config.yml')
+export function readYamlConfig(projectRoot: string): CapyTraceYaml {
+  const configPath = join(projectRoot, 'capytrace.config.yml')
   if (!existsSync(configPath)) return {}
 
   const raw = readFileSync(configPath, 'utf-8')
-  const parsed = loadYaml(raw) as FerretSearchYaml | null
+  const parsed = loadYaml(raw) as CapyTraceYaml | null
   return parsed ?? {}
 }
 
@@ -48,7 +59,7 @@ export function loadSlackConfig(projectRoot?: string): SlackConfig {
   if (!botToken) {
     throw new Error(
       'Slack connector is not configured: SLACK_BOT_TOKEN environment variable is missing. ' +
-        'Set it in your environment or under connectors.slack.botToken in ferretsearch.config.yml.',
+        'Set it in your environment or under connectors.slack.botToken in capytrace.config.yml.',
     )
   }
 

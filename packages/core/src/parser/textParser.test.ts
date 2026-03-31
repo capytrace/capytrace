@@ -13,10 +13,10 @@ const baseInput = {
 
 describe('TextParser', () => {
   it('should parse a text buffer into a Document', async () => {
-    const buffer = Buffer.from('Hello FerretSearch\nThis is the body.')
+    const buffer = Buffer.from('Hello CapyTrace\nThis is the body.')
     const doc = await parser.parse({ ...baseInput, buffer })
 
-    expect(doc.title).toBe('Hello FerretSearch')
+    expect(doc.title).toBe('Hello CapyTrace')
     expect(doc.content).toContain('This is the body.')
     expect(doc.sourceType).toBe('slack')
   })

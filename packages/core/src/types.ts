@@ -1,6 +1,7 @@
 // Represents any indexable document from any source
 export interface Document {
   id: string
+  stableId: string  // deterministic: "${sourceType}:${sourceId}:${externalId}"
   sourceType: 'slack' | 'teams' | 'github' | 'drive' | 'filesystem'
   sourceId: string // workspace/repo/drive id
   externalId: string // original id from the source

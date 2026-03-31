@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { Document, IConnector } from '@ferretsearch/core'
+import type { Document, IConnector } from '@capytrace/core'
 import { GitHubClient } from './githubClient.js'
 import type { GitHubConfig, GitHubFile, GitHubIssue, GitHubPR, GitHubRepo } from './types.js'
 
@@ -89,6 +89,7 @@ export class GitHubConnector implements IConnector {
   private readmeToDocument(content: string, repoSlug: string, repo: GitHubRepo): Document {
     const doc: Document = {
       id: randomUUID(),
+      stableId: `github:${repoSlug}:readme`,
       sourceType: 'github',
       sourceId: repoSlug,
       externalId: 'readme',
@@ -109,6 +110,7 @@ export class GitHubConnector implements IConnector {
 
     const doc: Document = {
       id: randomUUID(),
+      stableId: `github:${repoSlug}:issue-${issue.number}`,
       sourceType: 'github',
       sourceId: repoSlug,
       externalId: issue.number.toString(),
@@ -135,6 +137,7 @@ export class GitHubConnector implements IConnector {
 
     const doc: Document = {
       id: randomUUID(),
+      stableId: `github:${repoSlug}:pr-${pr.number}`,
       sourceType: 'github',
       sourceId: repoSlug,
       externalId: pr.number.toString(),
@@ -158,6 +161,7 @@ export class GitHubConnector implements IConnector {
   private wikiToDocument(content: string, repoSlug: string, repo: GitHubRepo): Document {
     return {
       id: randomUUID(),
+      stableId: `github:${repoSlug}:wiki`,
       sourceType: 'github',
       sourceId: repoSlug,
       externalId: 'wiki',
@@ -173,6 +177,7 @@ export class GitHubConnector implements IConnector {
   private fileToDocument(file: GitHubFile, repoSlug: string, repo: GitHubRepo): Document {
     return {
       id: randomUUID(),
+      stableId: `github:${repoSlug}:file-${file.path}`,
       sourceType: 'github',
       sourceId: repoSlug,
       externalId: file.path,

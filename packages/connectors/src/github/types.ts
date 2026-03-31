@@ -1,4 +1,4 @@
-import type { ConnectorConfig } from '@ferretsearch/core'
+import type { ConnectorConfig } from '@capytrace/core'
 
 export interface GitHubConfig extends ConnectorConfig {
   type: 'github'

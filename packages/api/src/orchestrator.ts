@@ -1,11 +1,13 @@
-import { indexQueue } from '@ferretsearch/core'
-import type { IConnector } from '@ferretsearch/core'
+import { indexQueue } from '@capytrace/core'
+import type { IConnector } from '@capytrace/core'
 import {
   SlackConnector,
   loadSlackConfig,
   GitHubConnector,
   loadGitHubConfig,
-} from '@ferretsearch/connectors'
+  DriveConnector,
+  loadDriveConfig,
+} from '@capytrace/connectors'
 
 export interface ConnectorStatus {
   id: string
@@ -22,7 +24,7 @@ interface ConnectorEntry {
   interval: ReturnType<typeof setInterval> | null
 }
 
-const log = (msg: string) => console.log(`[FerretSearch] ${msg}`)
+const log = (msg: string) => console.log(`[CapyTrace] ${msg}`)
 
 export class Orchestrator {
   private readonly entries = new Map<string, ConnectorEntry>()
@@ -128,6 +130,27 @@ export class Orchestrator {
         })
       } catch (err) {
         log(`Could not load GitHub config: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    }
+
+    // Google Drive — only if service account key is configured
+    if (process.env['GOOGLE_SERVICE_ACCOUNT_KEY']) {
+      try {
+        const config = loadDriveConfig()
+        const connector = new DriveConnector(config)
+        this.entries.set(config.id, {
+          connector,
+          status: {
+            id: config.id,
+            type: config.type,
+            status: 'idle',
+            lastSync: null,
+            documentsIndexed: 0,
+          },
+          interval: null,
+        })
+      } catch (err) {
+        log(`Could not load Google Drive config: ${err instanceof Error ? err.message : String(err)}`)
       }
     }
   }

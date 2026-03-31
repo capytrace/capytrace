@@ -8,6 +8,7 @@ export interface ParseInput {
   sourceId: string
   externalId: string
   permissions: string[]
+  stableId?: string
   metadata?: Record<string, unknown>
 }
 

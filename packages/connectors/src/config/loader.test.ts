@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { loadSlackConfig } from './loader.js'
 
 function makeTempDir(): string {
-  const dir = join(tmpdir(), `ferretsearch-test-${Date.now()}`)
+  const dir = join(tmpdir(), `capytrace-test-${Date.now()}`)
   mkdirSync(dir, { recursive: true })
   return dir
 }
@@ -94,7 +94,7 @@ describe('loadSlackConfig', () => {
     const dir = makeTempDir()
     try {
       writeFileSync(
-        join(dir, 'ferretsearch.config.yml'),
+        join(dir, 'capytrace.config.yml'),
         [
           'connectors:',
           '  slack:',
@@ -118,7 +118,7 @@ describe('loadSlackConfig', () => {
     const dir = makeTempDir()
     try {
       writeFileSync(
-        join(dir, 'ferretsearch.config.yml'),
+        join(dir, 'capytrace.config.yml'),
         [
           'connectors:',
           '  slack:',

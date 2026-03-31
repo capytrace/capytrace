@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { loadGitHubConfig } from './githubLoader.js'
 
 function makeTempDir(): string {
-  const dir = join(tmpdir(), `ferretsearch-github-test-${Date.now()}`)
+  const dir = join(tmpdir(), `capytrace-github-test-${Date.now()}`)
   mkdirSync(dir, { recursive: true })
   return dir
 }
@@ -156,7 +156,7 @@ describe('loadGitHubConfig', () => {
     const dir = makeTempDir()
     try {
       writeFileSync(
-        join(dir, 'ferretsearch.config.yml'),
+        join(dir, 'capytrace.config.yml'),
         [
           'connectors:',
           '  github:',
@@ -183,7 +183,7 @@ describe('loadGitHubConfig', () => {
     const dir = makeTempDir()
     try {
       writeFileSync(
-        join(dir, 'ferretsearch.config.yml'),
+        join(dir, 'capytrace.config.yml'),
         [
           'connectors:',
           '  github:',

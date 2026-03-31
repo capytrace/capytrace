@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import type { Document, IConnector } from '@ferretsearch/core'
-import { getParser } from '@ferretsearch/core'
+import type { Document, IConnector } from '@capytrace/core'
+import { getParser } from '@capytrace/core'
 import { SlackClient } from './slackClient.js'
 import { FileDownloader } from './fileDownloader.js'
 import type { SlackConfig, SlackMessage } from './types.js'
@@ -57,6 +57,7 @@ export class SlackConnector implements IConnector {
                   sourceId: channel.id,
                   externalId: file.id,
                   permissions: ['*'],
+                  stableId: `slack:${channel.id}:file-${file.id}`,
                   metadata: {
                     channelId: channel.id,
                     messageTs: message.ts,
@@ -99,6 +100,7 @@ export class SlackConnector implements IConnector {
 
     const doc: Document = {
       id: randomUUID(),
+      stableId: `slack:${channelId}:${message.ts}`,
       sourceType: 'slack',
       sourceId: channelId,
       externalId: message.ts,

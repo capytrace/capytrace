@@ -1,10 +1,10 @@
 import '@dotenvx/dotenvx/config'
 
-import { indexWorker, QdrantStore } from '@ferretsearch/core'
+import { indexWorker, QdrantStore } from '@capytrace/core'
 import { Orchestrator } from './orchestrator.js'
 import { buildServer } from './server.js'
 
-const log = (msg: string) => console.log(`[FerretSearch] ${msg}`)
+const log = (msg: string) => console.log(`[CapyTrace] ${msg}`)
 
 async function checkServices(): Promise<{ redis: boolean; qdrant: boolean; ollama: boolean }> {
   const qdrantUrl = process.env['QDRANT_URL'] ?? 'http://localhost:6333'
@@ -92,6 +92,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('[FerretSearch] Fatal error:', err)
+  console.error('[CapyTrace] Fatal error:', err)
   process.exit(1)
 })

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { SlackConfig, SlackMessage, SlackChannel, SlackFile } from './types.js'
-import type { Document } from '@ferretsearch/core'
+import type { Document } from '@capytrace/core'
 
 // ---------------------------------------------------------------------------
 // Hoisted mocks
@@ -35,7 +35,7 @@ vi.mock('./fileDownloader.js', () => ({
   },
 }))
 
-vi.mock('@ferretsearch/core', () => ({
+vi.mock('@capytrace/core', () => ({
   getParser: mockGetParser,
 }))
 
@@ -205,6 +205,9 @@ describe('messageToDocument() via sync()', () => {
 
     // id is a UUID
     expect(doc.id).toMatch(/^[0-9a-f-]{36}$/)
+
+    // stableId is deterministic
+    expect(doc.stableId).toBe('slack:C001:1700000000.123456')
   })
 
   it('sets threadTs to null when message is not a thread reply', async () => {
@@ -253,6 +256,7 @@ function makePdfFile(overrides?: Partial<SlackFile>): SlackFile {
 function makeFileDoc(overrides?: Partial<Document>): Document {
   return {
     id: 'doc-file-001',
+    stableId: 'slack:C001:file-F001',
     sourceType: 'slack',
     sourceId: 'C001',
     externalId: 'F001',
@@ -275,7 +279,7 @@ describe('SlackConnector file attachments', () => {
     const channels: SlackChannel[] = [{ id: 'C001', name: 'general', is_private: false }]
     const message: SlackMessage = {
       ts: '1700000000.000001',
-      text: 'plano do ferret search',
+      text: 'plano do capytrace search',
       user: 'U001',
       type: 'message',
       files: [makePdfFile()],
@@ -298,11 +302,13 @@ describe('SlackConnector file attachments', () => {
 
     // First document: the text message
     expect(docs[0]!.externalId).toBe('1700000000.000001')
-    expect(docs[0]!.content).toBe('plano do ferret search')
+    expect(docs[0]!.content).toBe('plano do capytrace search')
+    expect(docs[0]!.stableId).toBe('slack:C001:1700000000.000001')
 
     // Second document: the file
     expect(docs[1]!.title).toBe('report.pdf')
     expect(docs[1]!.url).toBe('https://files.slack.com/report.pdf')
+    expect(docs[1]!.stableId).toBe('slack:C001:file-F001')
   })
 
   it('download error does not interrupt sync of remaining messages', async () => {

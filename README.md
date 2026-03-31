@@ -1,7 +1,7 @@
 <h1 align="center">Capytrace</h1>
 
 <p align="center"
-  <img width="1536" height="1024" alt="ferretsearch_textnobg" src="https://github.com/user-attachments/assets/210080a2-f9a5-4bfe-8d37-c9750868f25f" />
+  <img width="1536" height="1024" alt="capytrace_textnobg" src="https://github.com/user-attachments/assets/210080a2-f9a5-4bfe-8d37-c9750868f25f" />
 
 </p>
 
@@ -62,8 +62,8 @@ ollama pull nomic-embed-text
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-org/ferretsearch.git
-cd ferretsearch
+git clone https://github.com/your-org/capytrace.git
+cd capytrace
 pnpm install
 ```
 
@@ -124,7 +124,7 @@ SLACK_CHANNELS=C0123456789,C9876543210   # comma-separated channel IDs
 SLACK_SYNC_HISTORY_DAYS=7                # how far back to sync, default: 30
 ```
 
-To find channel IDs: run `pnpm --filter @ferretsearch/connectors list-channels` after setting the token.
+To find channel IDs: run `pnpm --filter @capytrace/connectors list-channels` after setting the token.
 
 ### GitHub connector
 
@@ -147,7 +147,7 @@ GITHUB_SYNC_INTERVAL_MINUTES=60
 
 ### YAML config (alternative)
 
-You can also configure connectors in `ferretsearch.config.yml` at the project root. Environment variables always take priority.
+You can also configure connectors in `capytrace.config.yml` at the project root. Environment variables always take priority.
 
 ```yaml
 connectors:
@@ -293,16 +293,16 @@ Connects and streams documents without indexing — useful to validate credentia
 
 ```bash
 # Slack
-pnpm --filter @ferretsearch/connectors smoke
+pnpm --filter @capytrace/connectors smoke
 
 # GitHub
-pnpm --filter @ferretsearch/connectors smoke:github
+pnpm --filter @capytrace/connectors smoke:github
 ```
 
 ### Project structure
 
 ```
-ferretsearch/
+capytrace/
 ├── packages/
 │   ├── core/
 │   │   └── src/
@@ -324,15 +324,15 @@ ferretsearch/
 │           └── orchestrator.ts       # Connector lifecycle management
 ├── docker-compose.yml
 ├── .env.example
-└── ferretsearch.config.yml           # optional YAML config
+└── capytrace.config.yml           # optional YAML config
 ```
 
 ### Adding a connector
 
-Implement the `IConnector` interface from `@ferretsearch/core`:
+Implement the `IConnector` interface from `@capytrace/core`:
 
 ```typescript
-import type { IConnector, ConnectorConfig, Document } from '@ferretsearch/core'
+import type { IConnector, ConnectorConfig, Document } from '@capytrace/core'
 
 export class MyConnector implements IConnector {
   readonly config: ConnectorConfig
