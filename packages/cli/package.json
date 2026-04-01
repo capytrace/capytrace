@@ -1,0 +1,29 @@
+{
+  "name": "@capytrace/cli",
+  "version": "0.1.0",
+  "description": "CLI for CapyTrace — corporate knowledge search engine",
+  "type": "module",
+  "bin": { "capytrace": "./dist/bin/capytrace.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests yet\" && exit 0",
+    "dev": "tsx src/bin/capytrace.ts"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.3.2",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "keywords": ["capytrace", "cli", "search"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.32.1"
+}

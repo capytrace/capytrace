@@ -1,179 +1,112 @@
-<h1 align="center">Capytrace</h1>
+<h1 align="center">🦫 CapyTrace</h1>
 
-<p align="center"
-  <img width="1536" height="1024" alt="capytrace_textnobg" src="https://github.com/user-attachments/assets/210080a2-f9a5-4bfe-8d37-c9750868f25f" />
-
+<p align="center">
+  <strong>Corporate knowledge search engine — self-hosted, open source, semantic.</strong>
 </p>
 
-**Corporate open-source search engine.** Index knowledge from Slack, GitHub, and your filesystem into a single semantic search API.
-
-Capytrace connects to your internal tools, chunks and embeds documents locally using [Ollama](https://ollama.com), stores vectors in [Qdrant](https://qdrant.tech), and exposes a search API that returns the most relevant results across all sources.
-
----
-
-## How it works
-
-```
-Sources (Slack, GitHub, ...) → Connectors → BullMQ Queue → Indexing Pipeline → Qdrant
-                                                                                    ↓
-                                                          User query → Embed → Vector Search
-```
-
-1. **Connectors** sync documents from configured sources into a BullMQ queue
-2. **Workers** pick up each job, chunk the document, embed it via Ollama, and upsert vectors into Qdrant
-3. **Search API** embeds the query and performs approximate nearest-neighbour search in Qdrant
+<p align="center">
+  Index knowledge from Slack, GitHub, Google Drive and more into a single search API powered by local AI.
+  Your data never leaves your infrastructure.
+</p>
 
 ---
 
-## Packages
+## ✨ Features
 
-| Package | Description |
-|---|---|
-| `packages/core` | Indexing pipeline: types, chunker, embedder, Qdrant client, BullMQ queue/worker, parsers |
-| `packages/connectors` | Source connectors — Slack and GitHub |
-| `packages/api` | Fastify REST API + orchestrator that manages connector lifecycle |
-| `packages/sdk` | _(planned)_ TypeScript SDK |
-| `packages/ui` | _(planned)_ Web UI |
+- **Semantic search** across all your corporate knowledge — not just keywords
+- **Connectors** for Slack, GitHub and Google Drive (more via Plugin SDK)
+- **Local AI embeddings** via Ollama — zero data sent to third parties
+- **Simple self-hosting** with Docker Compose in under 5 minutes
+- **Plugin SDK** to build custom connectors in TypeScript
+- **Search UI** included — dark-mode, responsive, instant results
 
 ---
 
-## Prerequisites
+## 🚀 Quick Start (5 minutes)
 
-| Dependency | Version | Purpose |
-|---|---|---|
-| Node.js | ≥ 18 | Runtime |
-| pnpm | ≥ 10 | Package manager |
-| Redis | ≥ 7 | BullMQ job queue |
-| Qdrant | latest | Vector database |
-| Ollama | latest | Local embedding model |
+### Prerequisites
 
-### Embedding model
+- [Docker](https://www.docker.com/get-started) and Docker Compose
+- Node.js 18+
+- pnpm — `npm install -g pnpm`
 
-Capytrace uses `nomic-embed-text` by default (768-dimensional vectors). Pull it before starting:
+### Option A — Interactive wizard (recommended)
 
 ```bash
-ollama pull nomic-embed-text
+npx @capytrace/cli init
 ```
 
----
+The wizard will ask which connectors to enable, collect your credentials, and generate `.env` and `docker-compose.yml`.
 
-## Quick start
-
-### 1. Clone and install
+### Option B — Manual setup
 
 ```bash
-git clone https://github.com/your-org/capytrace.git
+git clone https://github.com/capytrace/capytrace.git
 cd capytrace
-pnpm install
-```
 
-### 2. Start infrastructure
-
-```bash
-docker compose up -d
-```
-
-This starts Redis (6379), Qdrant (6333), and Ollama (11434).
-
-### 3. Configure environment
-
-```bash
+# 1. Configure environment
 cp .env.example .env
+# Edit .env with your Slack/GitHub/Drive tokens
+
+# 2. Start infrastructure
+docker compose up -d
+
+# 3. Pull the embedding model (first run only)
+ollama pull nomic-embed-text
+
+# 4. Install dependencies and start
+pnpm install
+pnpm dev:all
 ```
 
-Edit `.env` and fill in your connector tokens (see [Configuration](#configuration) below).
-
-### 4. Run
-
-```bash
-pnpm dev
-```
-
-The API will be available at `http://localhost:3000`.
+Open **http://localhost:5173** to start searching.
 
 ---
 
-## Configuration
+## 📦 Architecture
 
-All configuration is done via environment variables. Copy `.env.example` to `.env` and fill in the values.
+```
+Sources (Slack, GitHub, Drive)
+  → Connectors  (packages/connectors)
+    → BullMQ Queue  (Redis)
+      → Indexing Worker
+        → Chunker → Ollama Embedder → Qdrant
+          → Search API  (packages/api)  :3000
+            → Web UI  (packages/ui)  :5173
+```
 
-### Infrastructure
+---
+
+## ⚙️ Configuration
+
+All configuration is done via environment variables. See [`.env.example`](.env.example) for the full reference.
+
+### Key variables
 
 ```env
+# Infrastructure (defaults work with docker compose up -d)
 REDIS_HOST=localhost
-REDIS_PORT=6379
-
 QDRANT_URL=http://localhost:6333
 OLLAMA_URL=http://localhost:11434
-```
 
-### API server
-
-```env
-API_PORT=3000          # default: 3000
-WORKER_CONCURRENCY=5   # parallel indexing jobs, default: 5
-```
-
-### Slack connector
-
-Set `SLACK_BOT_TOKEN` to enable Slack indexing. The bot needs `channels:history` and `channels:read` scopes.
-
-```env
+# Slack
 SLACK_BOT_TOKEN=xoxb-...
-SLACK_CHANNELS=C0123456789,C9876543210   # comma-separated channel IDs
-SLACK_SYNC_HISTORY_DAYS=7                # how far back to sync, default: 30
-```
+SLACK_CHANNELS=C0123456789,C9876543210
 
-To find channel IDs: run `pnpm --filter @capytrace/connectors list-channels` after setting the token.
-
-### GitHub connector
-
-Set `GITHUB_TOKEN` to enable GitHub indexing. Use a classic token with `repo` scope or a fine-grained token with read access.
-
-```env
+# GitHub
 GITHUB_TOKEN=ghp_...
-GITHUB_REPOS=owner/repo1,owner/repo2     # required: repos to index
+GITHUB_REPOS=owner/repo1,owner/repo2
 
-GITHUB_INDEX_README=true                 # default: true
-GITHUB_INDEX_ISSUES=true                 # default: true
-GITHUB_INDEX_PRS=true                    # default: true
-GITHUB_INDEX_WIKI=true                   # default: true
-GITHUB_INDEX_CODE=false                  # default: false — opt-in required
-GITHUB_CODE_EXTENSIONS=.ts,.js,.py,.go,.java
-GITHUB_SYNC_INTERVAL_MINUTES=60
-```
-
-> **Note:** Code indexing (`GITHUB_INDEX_CODE`) is disabled by default. Enable it only when needed — large repos can exhaust the GitHub rate limit quickly.
-
-### YAML config (alternative)
-
-You can also configure connectors in `capytrace.config.yml` at the project root. Environment variables always take priority.
-
-```yaml
-connectors:
-  slack:
-    botToken: xoxb-...
-    channels:
-      - C0123456789
-    syncHistoryDays: 7
-
-  github:
-    token: ghp_...
-    repos:
-      - owner/repo
-    indexCode: false
-    codeExtensions:
-      - .ts
-      - .py
+# Google Drive
+GOOGLE_SERVICE_ACCOUNT_KEY=./credentials/google-service-account.json
+GOOGLE_DRIVE_FOLDER_IDS=your_folder_id
 ```
 
 ---
 
-## API
+## 🌐 API Reference
 
 ### `POST /search`
-
-Semantic search across all indexed documents.
 
 ```bash
 curl -X POST http://localhost:3000/search \
@@ -181,33 +114,15 @@ curl -X POST http://localhost:3000/search \
   -d '{"query": "deployment process", "limit": 5}'
 ```
 
-**Request body:**
-
-```json
-{
-  "query": "string",
-  "limit": 10,
-  "filters": {
-    "sourceType": "slack",
-    "author": "alice"
-  }
-}
-```
-
-**Response:**
-
 ```json
 {
   "results": [
     {
-      "documentId": "...",
-      "chunkId": "...",
       "score": 0.92,
       "title": "How we deploy to production",
       "snippet": "We use GitHub Actions with...",
-      "url": "https://github.com/...",
       "sourceType": "github",
-      "highlights": []
+      "url": "https://github.com/..."
     }
   ],
   "total": 1,
@@ -215,166 +130,112 @@ curl -X POST http://localhost:3000/search \
 }
 ```
 
+Filter by source: `"filters": { "sourceType": "slack" }`
+
 ### `GET /health`
 
-Returns health status of all dependencies.
-
-```bash
-curl http://localhost:3000/health
-```
+Returns service status (200 = ok, 503 = degraded):
 
 ```json
-{
-  "status": "ok",
-  "services": { "redis": true, "qdrant": true, "ollama": true }
-}
+{ "status": "ok", "services": { "redis": true, "qdrant": true, "ollama": true } }
 ```
-
-Returns `503` when any service is unreachable.
 
 ### `GET /sources`
 
-Lists all active connectors and their sync status.
-
-```bash
-curl http://localhost:3000/sources
-```
-
-```json
-[
-  {
-    "id": "slack",
-    "type": "slack",
-    "status": "idle",
-    "lastSync": "2024-01-15T10:30:00.000Z",
-    "documentsIndexed": 1243
-  }
-]
-```
+Lists all configured connectors and their last sync time.
 
 ### `POST /sync`
 
-Triggers an immediate manual sync of all connectors.
-
-```bash
-curl -X POST http://localhost:3000/sync
-```
-
-```json
-{ "queued": 87, "connectors": ["slack", "github"] }
-```
+Triggers an immediate sync across all connectors.
 
 ---
 
-## Development
+## 🔌 Building a Connector
 
-### Run all tests
-
-```bash
-pnpm test
-```
-
-### Typecheck
-
-```bash
-pnpm typecheck
-```
-
-### Lint
-
-```bash
-pnpm lint
-pnpm lint:fix
-```
-
-### Smoke test a connector
-
-Connects and streams documents without indexing — useful to validate credentials and inspect output:
-
-```bash
-# Slack
-pnpm --filter @capytrace/connectors smoke
-
-# GitHub
-pnpm --filter @capytrace/connectors smoke:github
-```
-
-### Project structure
-
-```
-capytrace/
-├── packages/
-│   ├── core/
-│   │   └── src/
-│   │       ├── types.ts              # Document, Chunk, SearchResult, IConnector
-│   │       ├── chunker/              # SlidingWindowChunker
-│   │       ├── embedder/             # OllamaEmbedder (Ollama REST API)
-│   │       ├── parser/               # PDF, DOCX, TXT parsers
-│   │       ├── queue/                # BullMQ indexQueue + indexWorker
-│   │       └── qdrant/               # QdrantStore (upsert + search)
-│   ├── connectors/
-│   │   └── src/
-│   │       ├── slack/                # SlackConnector, SlackClient, FileDownloader
-│   │       ├── github/               # GitHubConnector, GitHubClient
-│   │       └── config/               # loader.ts, githubLoader.ts
-│   └── api/
-│       └── src/
-│           ├── main.ts               # Startup: health checks, orchestrator, server
-│           ├── server.ts             # Fastify routes
-│           └── orchestrator.ts       # Connector lifecycle management
-├── docker-compose.yml
-├── .env.example
-└── capytrace.config.yml           # optional YAML config
-```
-
-### Adding a connector
-
-Implement the `IConnector` interface from `@capytrace/core`:
+Use the Plugin SDK to add new sources:
 
 ```typescript
-import type { IConnector, ConnectorConfig, Document } from '@capytrace/core'
+import { BaseConnector, type Document, type ConnectorConfig } from '@capytrace/sdk'
 
-export class MyConnector implements IConnector {
+export class NotionConnector extends BaseConnector {
   readonly config: ConnectorConfig
 
   constructor(config: ConnectorConfig) {
+    super()
     this.config = config
   }
 
-  async connect(): Promise<void> {
-    // validate credentials
-  }
-
   async *sync(): AsyncGenerator<Document> {
-    // yield documents
-  }
-
-  async disconnect(): Promise<void> {
-    // cleanup
+    const pages = await fetchNotionPages()
+    for (const page of pages) {
+      yield this.createDocument({
+        sourceType: 'filesystem',
+        sourceId: this.config.id,
+        externalId: page.id,
+        title: page.title,
+        content: page.markdown,
+        metadata: { author: page.author },
+        url: page.url,
+      })
+    }
   }
 }
 ```
 
-Then register it in `packages/api/src/orchestrator.ts` by checking for its environment token.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for a full walkthrough.
 
 ---
 
-## Tech stack
+## 🛠 CLI
 
-| Layer | Technology |
+```bash
+capytrace init      # Setup wizard — generate .env and docker-compose.yml
+capytrace start     # Start with Docker Compose (production)
+capytrace stop      # Stop all containers
+capytrace sync      # Trigger manual sync
+capytrace status    # Show service and connector status
+capytrace logs -f   # Stream logs
+```
+
+---
+
+## 📁 Packages
+
+| Package | Description |
 |---|---|
-| Language | TypeScript (strict, ES2022, NodeNext) |
-| API | [Fastify](https://fastify.dev) |
-| Queue | [BullMQ](https://bullmq.io) + Redis |
-| Vector DB | [Qdrant](https://qdrant.tech) |
-| Embeddings | [Ollama](https://ollama.com) (`nomic-embed-text`) |
-| Slack | [@slack/web-api](https://github.com/slackapi/node-slack-sdk) |
-| GitHub | [@octokit/rest](https://github.com/octokit/rest.js) |
-| Testing | [Vitest](https://vitest.dev) |
-| Monorepo | pnpm workspaces |
+| `packages/core` | Types, chunker, embedder, Qdrant client, BullMQ queue |
+| `packages/connectors` | Slack, GitHub, Google Drive connectors |
+| `packages/api` | Fastify REST API + connector orchestrator |
+| `packages/ui` | React + Vite + Tailwind search UI |
+| `packages/sdk` | Plugin SDK for building custom connectors |
+| `packages/cli` | `capytrace` CLI |
 
 ---
 
-## License
+## 🏗 Self-Hosting (Production)
 
-MIT
+```bash
+# Build and start everything with Docker
+docker compose -f docker-compose.prod.yml up -d --build
+
+# The UI is served at :5173, API at :3000
+```
+
+All services (Qdrant, Redis, Ollama, API, UI) run in an isolated Docker network with restart policies and healthchecks.
+
+---
+
+## 🧑‍💻 Development
+
+```bash
+pnpm typecheck    # Type-check all packages
+pnpm test         # Run all tests
+pnpm lint         # ESLint
+pnpm build        # Build all packages
+```
+
+---
+
+## 📄 License
+
+AGPL-3.0 — free for self-hosting. Commercial license available for SaaS deployments.

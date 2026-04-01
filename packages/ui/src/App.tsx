@@ -29,7 +29,7 @@ function SearchPage() {
       <header className="sticky top-0 z-40 border-b border-gray-800/60 bg-[#0f0f11]/90 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="CapyTrace" className="h-9 w-9 object-contain" />
+            <img src="/logo.png" alt="CapyTrace" className="h-16 w-16 object-contain" />
             <span className="font-bold text-white text-lg tracking-tight">CapyTrace</span>
           </div>
           <div className="flex items-center gap-4">
