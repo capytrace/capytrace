@@ -238,4 +238,4 @@ pnpm build        # Build all packages
 
 ## 📄 License
 
-AGPL-3.0 — free for self-hosting. Commercial license available for SaaS deployments.
+MIT — free to use, modify, and distribute.

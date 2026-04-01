@@ -24,6 +24,6 @@
   },
   "keywords": ["capytrace", "cli", "search"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.32.1"
 }
