@@ -1,6 +1,12 @@
 <h1 align="center">🦫 CapyTrace</h1>
 
 <p align="center">
+  <img width="350" height="350" alt="capytrace" src="https://github.com/user-attachments/assets/eaba55e0-bdee-4ee2-b250-a97aea1d4009" />
+
+
+</p>
+
+<p align="center">
   <strong>Corporate knowledge search engine — self-hosted, open source, semantic.</strong>
 </p>
 
