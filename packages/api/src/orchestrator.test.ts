@@ -14,6 +14,7 @@ const {
   mockGithubDisconnect,
   mockGithubSync,
   mockLoadGitHubConfig,
+  mockLoadPlugin,
 } = vi.hoisted(() => ({
   mockAdd: vi.fn().mockResolvedValue({}),
   mockConnect: vi.fn().mockResolvedValue(undefined),
@@ -24,10 +25,15 @@ const {
   mockGithubDisconnect: vi.fn().mockResolvedValue(undefined),
   mockGithubSync: vi.fn(),
   mockLoadGitHubConfig: vi.fn(),
+  mockLoadPlugin: vi.fn(),
 }))
 
 vi.mock('@capytrace/core', () => ({
   indexQueue: { add: mockAdd },
+}))
+
+vi.mock('@capytrace/sdk', () => ({
+  loadPlugin: mockLoadPlugin,
 }))
 
 const SLACK_CONFIG = {
@@ -98,13 +104,16 @@ beforeEach(() => {
   mockGithubDisconnect.mockResolvedValue(undefined)
   mockGithubSync.mockReturnValue(makeGen([]))
   mockLoadGitHubConfig.mockReturnValue(GITHUB_CONFIG)
+  mockLoadPlugin.mockResolvedValue(undefined)
   delete process.env['SLACK_BOT_TOKEN']
   delete process.env['GITHUB_TOKEN']
+  delete process.env['CAPYTRACE_PLUGINS']
 })
 
 afterEach(() => {
   delete process.env['SLACK_BOT_TOKEN']
   delete process.env['GITHUB_TOKEN']
+  delete process.env['CAPYTRACE_PLUGINS']
 })
 
 // ---------------------------------------------------------------------------
@@ -290,5 +299,77 @@ describe('Orchestrator.stop()', () => {
     expect(mockSync).toHaveBeenCalledTimes(1)
 
     vi.useRealTimers()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Plugin loading via CAPYTRACE_PLUGINS
+// ---------------------------------------------------------------------------
+describe('Orchestrator plugin loading', () => {
+  const pluginSync = vi.fn()
+  const pluginConnect = vi.fn().mockResolvedValue(undefined)
+  const pluginDisconnect = vi.fn().mockResolvedValue(undefined)
+
+  const fakePlugin = {
+    manifest: {
+      name: 'notion-connector',
+      version: '1.0.0',
+      description: 'Notion',
+      author: 'Test',
+      sourceType: 'filesystem',
+      configSchema: {},
+    },
+    createConnector: () => ({
+      config: { id: 'notion-connector', type: 'filesystem', enabled: true, syncIntervalMinutes: 60, credentials: {} },
+      connect: pluginConnect,
+      sync: pluginSync,
+      disconnect: pluginDisconnect,
+    }),
+  }
+
+  beforeEach(() => {
+    pluginSync.mockReturnValue(makeGen([]))
+    pluginConnect.mockResolvedValue(undefined)
+    pluginDisconnect.mockResolvedValue(undefined)
+  })
+
+  it('does not call loadPlugin when CAPYTRACE_PLUGINS is not set', async () => {
+    const orch = new Orchestrator()
+    await orch.start()
+    expect(mockLoadPlugin).not.toHaveBeenCalled()
+  })
+
+  it('calls loadPlugin for each path in CAPYTRACE_PLUGINS', async () => {
+    process.env['CAPYTRACE_PLUGINS'] = './plugins/a.js,./plugins/b.js'
+    mockLoadPlugin.mockResolvedValue(fakePlugin)
+
+    const orch = new Orchestrator()
+    await orch.start()
+
+    expect(mockLoadPlugin).toHaveBeenCalledTimes(2)
+    expect(mockLoadPlugin).toHaveBeenCalledWith('./plugins/a.js')
+    expect(mockLoadPlugin).toHaveBeenCalledWith('./plugins/b.js')
+  })
+
+  it('registers the connector from a loaded plugin', async () => {
+    process.env['CAPYTRACE_PLUGINS'] = './plugins/notion.js'
+    mockLoadPlugin.mockResolvedValue(fakePlugin)
+
+    const orch = new Orchestrator()
+    await orch.start()
+    await flushMicrotasks()
+
+    const status = orch.getStatus().find((s) => s.id === 'notion-connector')
+    expect(status).toBeDefined()
+    expect(status?.type).toBe('filesystem')
+  })
+
+  it('logs and continues when loadPlugin throws', async () => {
+    process.env['CAPYTRACE_PLUGINS'] = './plugins/bad.js'
+    mockLoadPlugin.mockRejectedValue(new Error('module not found'))
+
+    const orch = new Orchestrator()
+    await expect(orch.start()).resolves.toBeUndefined()
+    expect(orch.getStatus()).toHaveLength(0)
   })
 })

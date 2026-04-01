@@ -15,6 +15,7 @@
     "@fastify/helmet": "^13.0.2",
     "@capytrace/connectors": "workspace:*",
     "@capytrace/core": "workspace:*",
+    "@capytrace/sdk": "workspace:*",
     "fastify": "^5.8.4"
   },
   "devDependencies": {

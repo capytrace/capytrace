@@ -1,5 +1,6 @@
 import { indexQueue } from '@capytrace/core'
 import type { IConnector } from '@capytrace/core'
+import { loadPlugin } from '@capytrace/sdk'
 import {
   SlackConnector,
   loadSlackConfig,
@@ -31,6 +32,7 @@ export class Orchestrator {
 
   async start(): Promise<void> {
     this.loadConnectors()
+    await this.loadPlugins()
 
     for (const [id, entry] of this.entries) {
       try {
@@ -88,6 +90,40 @@ export class Orchestrator {
     }
 
     return { queued: totalQueued, connectors: triggered }
+  }
+
+  private async loadPlugins(): Promise<void> {
+    const pluginPaths = process.env['CAPYTRACE_PLUGINS']
+    if (!pluginPaths) return
+
+    for (const rawPath of pluginPaths.split(',')) {
+      const modulePath = rawPath.trim()
+      try {
+        const plugin = await loadPlugin(modulePath)
+        const config = {
+          id: plugin.manifest.name,
+          type: plugin.manifest.sourceType as IConnector['config']['type'],
+          enabled: true,
+          syncIntervalMinutes: 60,
+          credentials: {},
+        }
+        const connector = plugin.createConnector(config)
+        this.entries.set(config.id, {
+          connector,
+          status: {
+            id: config.id,
+            type: config.type,
+            status: 'idle',
+            lastSync: null,
+            documentsIndexed: 0,
+          },
+          interval: null,
+        })
+        log(`Plugin "${config.id}" loaded`)
+      } catch (err) {
+        log(`Could not load plugin "${modulePath}": ${err instanceof Error ? err.message : String(err)}`)
+      }
+    }
   }
 
   private loadConnectors(): void {
