@@ -3,7 +3,6 @@
 <p align="center">
   <img width="350" height="350" alt="capytrace" src="https://github.com/user-attachments/assets/eaba55e0-bdee-4ee2-b250-a97aea1d4009" />
 
-
 </p>
 
 <p align="center">
@@ -14,6 +13,11 @@
   Index knowledge from Slack, GitHub, Google Drive and more into a single search API powered by local AI.
   Your data never leaves your infrastructure.
 </p>
+
+<p>
+  <img width="1894" height="898" alt="image" src="https://github.com/user-attachments/assets/1baf3bc6-f59b-49aa-86ec-b67c085a6679" />
+</p>
+<p align="center"> OpenSource CapyTrace V1 </p>
 
 ---
 
